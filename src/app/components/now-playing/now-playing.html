@@ -1,0 +1,7 @@
+<p>You have recently listened to:</p>
+@for (track of tracks; track $index) {
+    <div class="now-playing">
+        <p>{{ track.title }} by {{ track.artist }}</p>
+        <p>From the album {{ track.album }}</p>
+    </div>
+}
