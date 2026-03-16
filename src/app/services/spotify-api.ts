@@ -1,9 +1,9 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { Observable, tap } from 'rxjs';
-import { ArtistData } from '../models/artist-data';
-import { SpotifyToken } from '../models/spotify-token';
+import { map, Observable, tap } from 'rxjs';
+import { ArtistDataDto } from '../models/artist-data';
+import { SpotifyToken, SpotifyTokenDto } from '../models/spotify-token';
 @Injectable({
     providedIn: 'root',
 })
@@ -32,20 +32,21 @@ export class SpotifyApi {
         });
 
         return this.http
-            .post<SpotifyToken>(this.tokenUrl + '/api/token', body.toString(), { headers })
+            .post<SpotifyTokenDto>(this.tokenUrl + '/api/token', body.toString(), { headers })
             .pipe(
+                map(SpotifyToken.fromDto),
                 tap((token) => {
                     this.spotifyToken = token;
-                    console.log(this.spotifyToken.access_token);
+                    console.log(this.spotifyToken.accessToken);
                 }),
             );
     }
     //0fTSzq9jAh4c36UVb4V7CB
-    public getArtistData(artistId: string): Observable<ArtistData> {
+    public getArtistData(artistId: string): Observable<ArtistDataDto> {
         const headers = new HttpHeaders({
-            Authorization: `Bearer ${this.spotifyToken!.access_token}`,
+            Authorization: `Bearer ${this.spotifyToken!.accessToken}`,
         });
 
-        return this.http.get<ArtistData>(this.baseUrl + `/artists/${artistId}`, { headers });
+        return this.http.get<ArtistDataDto>(this.baseUrl + `/artists/${artistId}`, { headers });
     }
 }

@@ -1,4 +1,4 @@
-export interface ArtistData {
+export interface ArtistDataDto {
     external_urls: ExternalUrls;
     followers: Followers;
     genres: string[];
@@ -10,6 +10,8 @@ export interface ArtistData {
     type: string;
     uri: string;
 }
+
+//TODO map Dto to Class
 
 export interface ExternalUrls {
     spotify: string;
