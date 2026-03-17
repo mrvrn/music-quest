@@ -27,7 +27,7 @@ export class NowPlaying {
         this.spotifyApi.getAccessToken().subscribe((res) => {
             if (res) {
                 this.spotifyApi.getArtistData('0fTSzq9jAh4c36UVb4V7CB').subscribe((artistRes) => {
-                    console.log(artistRes.name);
+                    console.log(artistRes);
                 });
             }
         });

@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { map, Observable, tap } from 'rxjs';
-import { ArtistDataDto } from '../models/artist-data';
+import { ArtistData, ArtistDataDto } from '../models/artist-data';
 import { SpotifyToken, SpotifyTokenDto } from '../models/spotify-token';
 @Injectable({
     providedIn: 'root',
@@ -37,16 +37,18 @@ export class SpotifyApi {
                 map(SpotifyToken.fromDto),
                 tap((token) => {
                     this.spotifyToken = token;
-                    console.log(this.spotifyToken.accessToken);
                 }),
             );
     }
+
     //0fTSzq9jAh4c36UVb4V7CB
-    public getArtistData(artistId: string): Observable<ArtistDataDto> {
+    public getArtistData(artistId: string): Observable<ArtistData> {
         const headers = new HttpHeaders({
             Authorization: `Bearer ${this.spotifyToken!.accessToken}`,
         });
 
-        return this.http.get<ArtistDataDto>(this.baseUrl + `/artists/${artistId}`, { headers });
+        return this.http
+            .get<ArtistDataDto>(this.baseUrl + `/artists/${artistId}`, { headers })
+            .pipe(map(ArtistData.fromDto));
     }
 }

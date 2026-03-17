@@ -1,5 +1,11 @@
 <main class="main">
-	<h1>MusicQuest</h1>
-	<p>A gamified dashboard for your listening habits</p>
-	<app-now-playing></app-now-playing>
+    <div class="d-flex align-items-center justify-content-between p-3">
+        <h1>MusicQuest</h1>
+        <button class="btn connect-btn ms-3" (click)="this.spotifyAuth.connect()">
+            Connect Spotify
+        </button>
+    </div>
+    <p>A gamified dashboard for your listening habits</p>
+    <app-now-playing></app-now-playing>
+    <router-outlet />
 </main>
