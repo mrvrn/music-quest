@@ -1,5 +1,9 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment.development';
+import { SpotifyTokenService } from './spotify-token';
+import { map, Observable, tap } from 'rxjs';
+import { SpotifyToken, SpotifyTokenDto } from '../models/spotify-token';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 
 @Injectable({
     providedIn: 'root',
@@ -7,7 +11,12 @@ import { environment } from '../../environments/environment.development';
 export class SpotifyAuth {
     codeVerifier: string;
     clientId: string;
+    spotifyToken?: SpotifyToken;
 
+    private http = inject(HttpClient);
+    spotifyTokenService = inject(SpotifyTokenService);
+
+    tokenUrl = 'https://accounts.spotify.com';
     redirectUri = 'http://127.0.0.1:4200/callback';
     scope = 'user-read-private user-read-email';
     authUrl = new URL('https://accounts.spotify.com/authorize');
@@ -59,31 +68,28 @@ export class SpotifyAuth {
         window.location.href = this.authUrl.toString();
     };
 
-    getToken = async (code: string) => {
+    getToken = (code: string): Observable<SpotifyToken> => {
         const codeVerifier = sessionStorage.getItem('spotifyCodeVerifier');
 
         if (!codeVerifier) {
             throw new Error('Missing Spotify code verifier. Please reconnect and try again.');
         }
 
-        const url = 'https://accounts.spotify.com/api/token';
-        const payload = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                client_id: this.clientId,
-                grant_type: 'authorization_code',
-                code,
-                redirect_uri: this.redirectUri,
-                code_verifier: codeVerifier,
-            }),
-        };
+        const body = new HttpParams()
+            .set('client_id', this.clientId)
+            .set('grant_type', 'authorization_code')
+            .set('code', code)
+            .set('redirect_uri', this.redirectUri)
+            .set('code_verifier', codeVerifier);
 
-        const body = await fetch(url, payload);
-        const response = await body.json();
+        const headers = new HttpHeaders({
+            'Content-Type': 'application/x-www-form-urlencoded',
+        });
 
-        sessionStorage.setItem('accessToken', response.access_token);
+        const data = this.http
+            .post<SpotifyTokenDto>(this.tokenUrl + '/api/token', body.toString(), { headers })
+            .pipe(map(SpotifyToken.fromDto));
+
+        return data;
     };
 }

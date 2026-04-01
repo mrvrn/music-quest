@@ -4,6 +4,7 @@ import { environment } from '../../environments/environment';
 import { map, Observable, tap } from 'rxjs';
 import { ArtistData, ArtistDataDto } from '../models/artist-data';
 import { SpotifyToken, SpotifyTokenDto } from '../models/spotify-token';
+import { SpotifyTokenService } from './spotify-token';
 @Injectable({
     providedIn: 'root',
 })
@@ -13,38 +14,46 @@ export class SpotifyApi {
     tokenUrl = 'https://accounts.spotify.com';
     baseUrl = 'https://api.spotify.com/v1';
     clientId: string;
-    clientSecret: string;
+    // clientSecret: string;
     spotifyToken?: SpotifyToken;
+    spotifyTokenService = inject(SpotifyTokenService);
 
     constructor() {
         this.clientId = environment.clientId;
-        this.clientSecret = environment.clientSecret;
+        // this.clientSecret = environment.clientSecret;
     }
 
-    public getAccessToken(): Observable<SpotifyToken> {
-        const body = new HttpParams()
-            .set('grant_type', 'client_credentials')
-            .set('client_id', this.clientId)
-            .set('client_secret', this.clientSecret);
+    // public getAccessToken(): Observable<SpotifyToken> {
+    //     const body = new HttpParams()
+    //         .set('grant_type', 'client_credentials')
+    //         .set('client_id', this.clientId)
+    //         .set('client_secret', this.clientSecret);
 
-        const headers = new HttpHeaders({
-            'Content-Type': 'application/x-www-form-urlencoded',
-        });
+    //     const headers = new HttpHeaders({
+    //         'Content-Type': 'application/x-www-form-urlencoded',
+    //     });
 
-        return this.http
-            .post<SpotifyTokenDto>(this.tokenUrl + '/api/token', body.toString(), { headers })
-            .pipe(
-                map(SpotifyToken.fromDto),
-                tap((token) => {
-                    this.spotifyToken = token;
-                }),
-            );
-    }
+    //     return this.http
+    //         .post<SpotifyTokenDto>(this.tokenUrl + '/api/token', body.toString(), { headers })
+    //         .pipe(
+    //             map(SpotifyToken.fromDto),
+    //             tap((token) => {
+    //                 this.spotifyToken = token;
+    //             }),
+    //         );
+    // }
 
     //0fTSzq9jAh4c36UVb4V7CB
     public getArtistData(artistId: string): Observable<ArtistData> {
+        const tokenService = this.spotifyTokenService.getStoredToken();
+
+        if (!tokenService) {
+            throw new Error('No access token available');
+        }
+
+        this.spotifyToken = tokenService;
         const headers = new HttpHeaders({
-            Authorization: `Bearer ${this.spotifyToken!.accessToken}`,
+            Authorization: `Bearer ${this.spotifyToken.accessToken}`,
         });
 
         return this.http

@@ -24,12 +24,8 @@ export class NowPlaying {
     spotifyApi = inject(SpotifyApi);
 
     constructor() {
-        this.spotifyApi.getAccessToken().subscribe((res) => {
-            if (res) {
-                this.spotifyApi.getArtistData('0fTSzq9jAh4c36UVb4V7CB').subscribe((artistRes) => {
-                    console.log(artistRes);
-                });
-            }
+        this.spotifyApi.getArtistData('0fTSzq9jAh4c36UVb4V7CB').subscribe((artistData) => {
+            console.log('Artist Data:', artistData);
         });
     }
 }
